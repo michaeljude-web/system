@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Responsive Sidebar</title>
+    <title>Admin|Dashboard</title>
+    <link rel="stylesheet" href="assets/font/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -115,18 +116,18 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <br>
-        <h2><span style="color: #ffff;">Benta</span><span>Bayan</span></h2>
-        <a href="#">Dashboard</a>
-        <a href="#">Employee</a>
+        <h2><span style="color: #ffff;">Blue</span><span>Market</span></h2>
+        <a href="#"><i class="fa fa-home"></i> Dashboard</a>
+        <a href="admin_add_employee.php"><i class="fa fa-users"></i> Employees</a>
         <a href="#">Services</a>
         <a href="#">Contact</a>
-        <div class="logout">Logout</div>
+         <a href="index.php" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
     </div>
     
     <!-- Navbar -->
     <div class="navbar" id="navbar">
-        <a href="#">Dashboard</a>
-        <a href="#">Employee</a>
+        <a href="#" title="Dashboard"><i class="fa fa-home"></i></a>
+        <a href="admin_add_employee.php" title="Employees"><i class="fa fa-users"></i></a>
         <a href="#">Services</a>
         <a href="#">Contact</a>
        

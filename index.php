@@ -1,30 +1,25 @@
 <?php
 session_start();
 
-include 'db_connection.php'; // Ensure connection is correct
+include 'db_connection.php'; 
 
-$max_attempts = 3; // Max allowed attempts before lockout
-$lockout_duration = 1; // Lockout duration in hours
+$max_attempts = 3;
+$lockout_duration = 1;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Fetch admin details from the database
     $stmt = $pdo->prepare("SELECT * FROM admin WHERE username = :username");
     $stmt->bindParam(':username', $username);
     $stmt->execute();
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // If user exists or not, we handle the login attempts
     if ($admin) {
-        // Check if the user is locked out
         if ($admin['lockout_time'] && strtotime($admin['lockout_time']) > time()) {
-            // Calculate time remaining for lockout
-            $remaining = ceil((strtotime($admin['lockout_time']) - time()) / 60); // Minutes remaining
+            $remaining = ceil((strtotime($admin['lockout_time']) - time()) / 60);
             $error = "Account is locked. Try again after $remaining minutes.";
         } else {
-            // Reset lockout if time has passed
             if ($admin['lockout_time'] && strtotime($admin['lockout_time']) < time()) {
                 $stmt = $pdo->prepare("UPDATE admin SET login_attempts = 0, lockout_time = NULL WHERE username = :username");
                 $stmt->bindParam(':username', $username);
@@ -32,22 +27,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $admin['login_attempts'] = 0;
             }
 
-            // Validate password (Consider using hashed password)
             if (password_verify($password, $admin['password'])) {
-                // Successful login, reset login attempts
                 $stmt = $pdo->prepare("UPDATE admin SET login_attempts = 0, lockout_time = NULL WHERE username = :username");
                 $stmt->bindParam(':username', $username);
                 $stmt->execute();
 
-                // Set session and redirect to admin dashboard
                 $_SESSION['admin'] = $admin['username'];
                 header("Location: admin_dashboard.php");
                 exit;
             } else {
-                // Increment failed login attempts
                 $login_attempts = $admin['login_attempts'] + 1;
 
-                // Lock account if max attempts reached
                 if ($login_attempts >= $max_attempts) {
                     $lockout_time = date("Y-m-d H:i:s", strtotime("+$lockout_duration hours"));
                     $stmt = $pdo->prepare("UPDATE admin SET login_attempts = :login_attempts, lockout_time = :lockout_time WHERE username = :username");
@@ -57,19 +47,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt->execute();
                     $error = "Account is locked. Try again after $lockout_duration hour(s).";
                 } else {
-                    // Update login attempts in the database
                     $stmt = $pdo->prepare("UPDATE admin SET login_attempts = :login_attempts WHERE username = :username");
                     $stmt->bindParam(':login_attempts', $login_attempts);
                     $stmt->bindParam(':username', $username);
                     $stmt->execute();
-                    $error = "Account is locked. Try again after remaining time.";
+                    $error = "Invalid password. You have $login_attempts out of $max_attempts attempts.";
                 }
             }
         }
     } else {
-        // Always show the same message for security, even if the user doesn't exist
-        sleep(1); // Optional: Add a slight delay for security
-        $error = "Account is locked. Try again after remaining time.";
+        sleep(1);
+        $error = "Invalid username or password.";
     }
 }
 ?>
