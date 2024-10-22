@@ -1,8 +1,50 @@
+<?php
+include 'db_connection.php'; 
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Sanitize input data to prevent SQL injection
+    $firstname = $_POST['firstname'];
+    $middlename = $_POST['middlename'];
+    $lastname = $_POST['lastname'];
+    $age = $_POST['age'];
+    $address = $_POST['address'];
+    $contact_number = $_POST['contact_number'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    
+    // Hash the password
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    // Insert query
+    $sql = "INSERT INTO employees (firstname, middle_name, lastname, age, address, contact_number, email, password)
+            VALUES (:firstname, :middlename, :lastname, :age, :address, :contact_number, :email, :hashed_password)";
+
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':firstname' => $firstname,
+            ':middlename' => $middlename,
+            ':lastname' => $lastname,
+            ':age' => $age,
+            ':address' => $address,
+            ':contact_number' => $contact_number,
+            ':email' => $email,
+            ':hashed_password' => $hashed_password
+        ]);
+        
+        echo "<script>alert('New employee added successfully!');</script>";
+        echo "<script>window.location.href = 'admin_add_employee.php';</script>";
+    } catch (PDOException $e) {
+        echo "<script>alert('Error: " . $e->getMessage() . "');</script>";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin | Dashboard</title>
+    <title>Admin | Add Employee</title>
     <link rel="stylesheet" href="assets/font/css/all.min.css">
     <style>
         body {
@@ -165,8 +207,8 @@
     <div class="sidebar" id="sidebar">
         <br>
         <h2><span style="color: #ffff;">Blue</span><span>Market</span></h2>
-        <a href="#"><i class="fa fa-home"></i> Dashboard</a>
-        <a href="#"><i class="fa fa-users"></i> Employees</a>
+        <a href="admin_dashboard.php"><i class="fa fa-home"></i> Dashboard</a>
+        <a href="admin_add_employee.php" class="active"><i class="fa fa-users"></i> Employees</a>
         <a href="#">Services</a>
         <a href="#">Contact</a>
         <a href="index.php" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
@@ -174,8 +216,8 @@
     
     <!-- Navbar -->
     <div class="navbar" id="navbar">
-        <a href="#" title="Dashboard"><i class="fa fa-home"></i></a>
-        <a href="#" title="Employees"><i class="fa fa-users"></i></a>
+        <a href="admin_dashboard.php" title="Dashboard"><i class="fa fa-home"></i></a>
+        <a href="admin_add_employee.php" class="active" title="Employees"><i class="fa fa-users"></i></a>
         <a href="#">Services</a>
         <a href="#">Contact</a>
     </div>
@@ -183,12 +225,11 @@
     <!-- Content -->
     <div class="content">
         <div class="header">
-            <p>Dashboard</p>
+            <p>Add Employee</p>
         </div>
         
         <div class="form-container">
-            <h2>Add Employee</h2>
-            <form action="insert_employee.php" method="POST">
+            <form method="POST">
                 <div class="form-row">
                     <div class="form-column">
                         <label for="firstname">First Name</label>
@@ -236,8 +277,5 @@
         </div>
     </div>
     
-    <script>
-        // JavaScript can be added here if needed
-    </script>
 </body>
 </html>

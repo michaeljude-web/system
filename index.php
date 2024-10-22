@@ -3,7 +3,8 @@ session_start();
 
 include 'db_connection.php'; 
 
-$max_attempts = 3;
+
+$max_attempts = 31;
 $lockout_duration = 1;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -108,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         input {
-            width: 100%;
+            width: 93%;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #333;
