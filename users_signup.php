@@ -1,10 +1,7 @@
 <?php
-// Include the database connection
-include 'db_connection.php'; // Make sure this file has your PDO connection setup
+include 'db_connection.php';
 
-// Check if form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get form data
     $firstname = $_POST['firstname'];
     $lastname = $_POST['lastname'];
     $gender = $_POST['gender'];
@@ -13,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT); 
 
-    // Check for duplicate email
+
     $checkEmailSql = "SELECT * FROM users WHERE email = :email";
     $checkEmailStmt = $pdo->prepare($checkEmailSql);
     $checkEmailStmt->bindParam(':email', $email);
@@ -22,14 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($checkEmailStmt->rowCount() > 0) {
         echo '<script>alert("Email already exists!")</script>';
     } else {
-        // Prepare the SQL statement for insertion
         $sql = "INSERT INTO users (firstname, lastname, gender, age, address, email, password) 
                 VALUES (:firstname, :lastname, :gender, :age, :address, :email, :password)";
 
-        // Prepare and execute the statement
         $stmt = $pdo->prepare($sql);
 
-        // Bind parameters
         $stmt->bindParam(':firstname', $firstname);
         $stmt->bindParam(':lastname', $lastname);
         $stmt->bindParam(':gender', $gender);
@@ -38,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password', $password);
 
-        // Execute the statement
         if ($stmt->execute()) {
             echo '<script>alert("New record created successfully!")</script>';
         } else {
@@ -146,7 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             height: 60px;
         }
 
-        /* Add a gap between form fields */
         .row, .gender-container, textarea {
             margin-bottom: 20px;
         }
@@ -158,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <form method="POST" action="">
     <h2>Sign Up</h2>
 
-    <!-- First Name and Last Name in Row -->
+  
     <div class="row">
         <div class="half-input">
             <label for="firstname"><i class="icon-user"></i> First Name:</label>
@@ -170,7 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 
-    <!-- Gender and Age in Row -->
     <div class="gender-age-container">
         <div class="gender-container">
             <label><i class="icon-heart"></i> Gender:</label><br>
@@ -185,11 +176,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 
-    <!-- Address -->
     <label for="address"><i class="icon-home"></i> Address:</label>
     <textarea name="address" id="address" placeholder="Your Address" required></textarea>
 
-    <!-- Email and Password in Row -->
     <div class="row">
         <div class="half-input">
             <label for="email"><i class="icon-envelope"></i> Email:</label>

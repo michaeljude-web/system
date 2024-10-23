@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['user_email'] = $user['email'];
 
         // Redirect to a welcome page or dashboard
-        header("Location: welcome.php");
+        header("Location: users_dashboard.php");
         exit;
     } else {
         $error_message = 'Invalid email or password!';
