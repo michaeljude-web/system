@@ -1,3 +1,32 @@
+<?php
+include 'db_connection.php'; // Include your database connection
+// Handle bidding
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bid'])) {
+    $product_id = $_POST['product_id'];
+    $user_id = 1; // Replace with the actual user ID from session or other means
+    $bid_amount = $_POST['bid_amount'];
+
+    // Insert bid into database (assumed there's a bids table)
+    $bid_sql = "INSERT INTO bids (product_id, user_id, bid_amount) VALUES (:product_id, :user_id, :bid_amount)";
+    $bid_stmt = $pdo->prepare($bid_sql);
+    $bid_stmt->bindParam(':product_id', $product_id);
+    $bid_stmt->bindParam(':user_id', $user_id);
+    $bid_stmt->bindParam(':bid_amount', $bid_amount);
+    
+    if ($bid_stmt->execute()) {
+        echo '<script>alert("Bid placed successfully!")</script>';
+    } else {
+        echo '<script>alert("Failed to place bid.")</script>';
+    }
+}
+
+// Fetch products from the database
+$sql = "SELECT * FROM products WHERE status = 'active'"; // Adjust as needed
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,7 +38,7 @@
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600' rel='stylesheet' type='text/css'>
     <style>
         body {
-            font-family: 'Open Sans', sans-serif;
+            font-family: Papyrus;
             margin: 0;
             padding: 0;
         }
@@ -96,7 +125,7 @@
             }
         }
 
-        /* Profile Icon Styles */
+        /* Profile */
         .profile-container {
             position: relative;
         }
@@ -170,7 +199,7 @@
         }
 
         .modal-content input {
-            width: 100%;
+            width: 94%;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #ccc;
@@ -181,6 +210,7 @@
             padding: 10px 15px;
             background-color: #ff6f61;
             color: white;
+            width: 100%;
             border: none;
             cursor: pointer;
             border-radius: 5px;
@@ -191,6 +221,104 @@
             cursor: pointer;
             font-size: 20px;
         }
+
+
+
+
+
+        /* General styles for the products section */
+#products {
+    padding: 2rem;
+    background-color: #f9f9f9;
+}
+
+#products h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Styles for each product card */
+.product-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-card img {
+    width: 100%;
+    height: 150px; 
+    object-fit: cover; 
+}
+
+.product-card h3 {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    padding: 0 1rem;
+}
+
+.product-card p {
+    padding: 0 1rem;
+    margin: 0.5rem 0;
+    color: #666;
+}
+
+.starting-bid {
+    font-weight: bold;
+    color: #007BFF; /* Bootstrap primary color */
+}
+
+.bid-end-time {
+    font-style: italic;
+}
+
+/* Styles for the bid form */
+.product-card form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+}
+
+.product-card label {
+    margin-bottom: 0.5rem;
+}
+
+.product-card input[type="number"] {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    width: 100%;
+}
+
+.product-card input[type="submit"] {
+    background-color: #28a745; /* Green */
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.product-card input[type="submit"]:hover {
+    background-color: #218838; /* Darker green */
+}
+
     </style>
 </head>
 
@@ -212,7 +340,7 @@
                     </div>
                     <div class="profile-dropdown">
                         <a id="editProfileBtn"><i class="fas fa-edit"></i>Edit Profile</a>
-                        <a href="#"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                        <a href="users_login.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
                     </div>
                 </div>
             </li>
@@ -225,14 +353,34 @@
     </section>
 
     <section id="products">
-        <h2>Our Products</h2>
-        <div class="product-grid">
-            <div class="product-card">Product 1</div>
-            <div class="product-card">Product 2</div>
-            <div class="product-card">Product 3</div>
-            <div class="product-card">Product 4</div>
-        </div>
-    </section>
+    <h2>Our Products</h2>
+    <div class="product-grid" id="productGrid">
+        <?php if ($products): ?>
+            <?php foreach ($products as $product): ?>
+                <div class="product-card">
+                    <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
+                    <h3><?php echo htmlspecialchars($product['product_name']); ?></h3>
+                    <p><?php echo htmlspecialchars($product['description']); ?></p>
+                    <p class="starting-bid">Starting Bid: $<?php echo number_format($product['starting_bid'], 2); ?></p>
+                    <p class="bid-end-time">Bid End Time: <?php echo htmlspecialchars($product['bid_end_time']); ?></p>
+                    
+                    <!-- Bid Form -->
+                    <form action="users_dashboard.php" method="POST">
+                        <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                        <label for="bid_amount">Your Bid:</label>
+                        <input type="number" step="0.01" name="bid_amount" required>
+                        <input type="submit" name="bid" value="Place Bid">
+                    </form>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p>No products available.</p>
+        <?php endif; ?>
+    </div>
+</section>
+
+
+    
 
     <footer id="contact">
         <p>Contact Us</p>
@@ -253,7 +401,14 @@
     </div>
 </div>
 
+
+
+
 <script>
+ 
+
+
+
 document.addEventListener('DOMContentLoaded', function () {
     fetch('get_user_data.php') 
         .then(response => response.json())

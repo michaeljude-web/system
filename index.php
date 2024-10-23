@@ -71,6 +71,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600' rel='stylesheet' type='text/css'>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css" rel="stylesheet">
     <style>
         body {
             background-color: #d1d8e0;
@@ -116,9 +118,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background-color: #f5f5f5;
         }
 
-        input:focus {
+        /* input:focus {
             outline: 2px dashed #333;
-        }
+        } */
 
         .login-button {
             width: 100%;

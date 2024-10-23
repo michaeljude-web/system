@@ -1,3 +1,47 @@
+
+<?php
+include 'db_connection.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $product_name = $_POST['product_name'];
+    $description = $_POST['description'];
+    $starting_bid = $_POST['starting_bid'];
+    $bid_end_time = $_POST['bid_end_time'];
+    $status = $_POST['status'];
+    $seller_id = 1;
+    
+    $image_url = null;
+    if (!empty($_FILES['image']['name'])) {
+        $target_dir = "uploads/";
+        $target_file = $target_dir . basename($_FILES["image"]["name"]);
+        if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+            $image_url = $target_file;
+        }
+    }
+
+    $sql = "INSERT INTO products (product_name, description, starting_bid, bid_end_time, status, image_url, seller_id)
+            VALUES (:product_name, :description, :starting_bid, :bid_end_time, :status, :image_url, :seller_id)";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':product_name', $product_name);
+    $stmt->bindParam(':description', $description);
+    $stmt->bindParam(':starting_bid', $starting_bid);
+    $stmt->bindParam(':bid_end_time', $bid_end_time);
+    $stmt->bindParam(':status', $status);
+    $stmt->bindParam(':image_url', $image_url);
+    $stmt->bindParam(':seller_id', $seller_id);
+
+    if ($stmt->execute()) {
+        echo '<script>alert("Product added successfully!")</script>';
+    } else {
+        echo '<script>alert("Faild to add Product")</script>';
+    }
+} else {
+    echo "Invalid request method.";
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -142,7 +186,38 @@
             <p>Dashboard</p>
         </div>
         
-        <p></p>
+        <div class="content">
+    <div class="header">
+        <p>Dashboard - Add Product</p>
+    </div>
+    
+    <form id="addProductForm" action="admin_add_product.php" method="POST" enctype="multipart/form-data">
+        <label for="product_name">Product Name:</label>
+        <input type="text" id="product_name" name="product_name" required><br><br>
+
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
+
+        <label for="starting_bid">Starting Bid:</label>
+        <input type="number" step="0.01" id="starting_bid" name="starting_bid" required><br><br>
+
+        <label for="bid_end_time">Bid End Time:</label>
+        <input type="datetime-local" id="bid_end_time" name="bid_end_time" required><br><br>
+
+        <label for="status">Status:</label>
+        <select id="status" name="status" required>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+            <option value="sold">Sold</option>
+        </select><br><br>
+
+        <label for="image">Product Image:</label>
+        <input type="file" id="image" name="image" accept="image/*"><br><br>
+
+        <input type="submit" value="Add Product">
+    </form>
+</div>
+
     </div>
     
     <script>
